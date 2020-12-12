@@ -2,7 +2,7 @@ import 'express-async-errors'
 
 import cors from 'cors'
 import dotenv from 'dotenv'
-import express from 'express'
+import express, { Request } from 'express'
 import { redirectToHTTPS } from 'express-http-to-https'
 import rateLimit from 'express-rate-limit'
 import helmet from 'helmet'
@@ -17,7 +17,7 @@ const app = express()
 dotenv.config()
 
 if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'))
+  app.use(morgan<Request>('dev'))
 } else if (process.env.NODE_ENV === 'production') {
   app.use(redirectToHTTPS())
   const requestPerSecond = 2
@@ -37,7 +37,7 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use(express.json())
 app.use(helmet())
-app.use(cors())
+app.use(cors<Request>())
 app.use(router)
 app.use(() => {
   throw new NotFoundError()

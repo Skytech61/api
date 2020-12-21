@@ -6,18 +6,17 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { authenticateUser } from '../../../middlewares/authenticateUser'
 import { validateRequest } from '../../../middlewares/validateRequest'
-import RefreshToken from '../../../models/RefreshToken'
 import User from '../../../models/User'
 import {
   commonErrorsMessages,
   imageFileUploadOptions,
   imagesPath
 } from '../../../utils/config/constants'
-import { alreadyUsedValidation } from '../../../utils/database/alreadyUsedValidation'
+import { alreadyUsedValidation } from '../../../utils/validations/alreadyUsedValidation'
 import { ForbiddenError } from '../../../utils/errors/ForbiddenError'
-import { UnauthorizedError } from '../../../utils/errors/UnauthorizedError'
 import { uploadImage } from '../../../utils/uploadImage'
 import { sendConfirmEmail } from '../__utils__/sendConfirmEmail'
+import { deleteEveryRefreshTokens } from '../__utils__/deleteEveryRefreshTokens'
 
 const usersLogoPath = path.join(imagesPath, 'users')
 
@@ -111,7 +110,7 @@ putCurrentRouter.put(
       imagesPath: usersLogoPath
     })
     if (resultUpload != null) {
-      user.logo = `/images/guilds/${resultUpload}`
+      user.logo = `/images/users/${resultUpload}`
     }
 
     // If the email changed, the user should confirm the new email
@@ -119,18 +118,8 @@ putCurrentRouter.put(
       user.email = email
 
       // Signout the user if he is using local strategy
-      if (req.user.strategy === 'local') {
-        const refreshTokens = await RefreshToken.findAll({
-          where: { userId: user.id }
-        })
-        if (refreshTokens == null) {
-          throw new UnauthorizedError()
-        }
-
-        // Delete all refreshTokens
-        for (const refreshToken of refreshTokens) {
-          await refreshToken.destroy()
-        }
+      if (req.user.currentStrategy === 'local') {
+        await deleteEveryRefreshTokens(user.id)
       }
 
       const tempToken = uuidv4()
@@ -140,7 +129,7 @@ putCurrentRouter.put(
         email,
         tempToken,
         redirectURI,
-        subject: 'SocialProject - Confirm email',
+        subject: 'Thream - Confirm email',
         renderOptions: {
           subtitle: 'Please confirm your email',
           buttonText: 'Yes, I confirm',
@@ -153,6 +142,6 @@ putCurrentRouter.put(
     const userSaved = await user.save()
     return res
       .status(200)
-      .json({ user: userSaved, strategy: req.user?.strategy })
+      .json({ user: userSaved, strategy: req.user.currentStrategy })
   }
 )

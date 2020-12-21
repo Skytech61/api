@@ -27,6 +27,8 @@ export const errorsMessages = {
   }
 }
 
+export const maximumTimeToResetPassword = '1 hour'
+
 export const postResetPasswordRouter = Router()
 
 postResetPasswordRouter.post(
@@ -59,7 +61,6 @@ postResetPasswordRouter.post(
     }
 
     const tempToken = uuidv4()
-    const maximumTimeToResetPassword = '1 hour'
     user.tempToken = tempToken
     user.tempExpirationToken = Date.now() + ms(maximumTimeToResetPassword)
     await user.save()
@@ -71,9 +72,9 @@ postResetPasswordRouter.post(
       footerText: `If you received this message by mistake, just delete it. Your password will not be reset if you do not click on the link above. Also, for the security of your account, the password reset is available for a period of ${maximumTimeToResetPassword}, pass this time, the reset will no longer be valid.`
     })
     await emailTransporter.sendMail({
-      from: `"SocialProject" <${EMAIL_INFO.auth.user}>`,
+      from: `"Thream" <${EMAIL_INFO?.auth?.user as string}>`,
       to: email,
-      subject: 'SocialProject - Reset password',
+      subject: 'Thream - Reset password',
       html: emailHTML
     })
 

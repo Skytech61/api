@@ -5,8 +5,9 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { validateRequest } from '../../middlewares/validateRequest'
 import User from '../../models/User'
+import UserSetting from '../../models/UserSetting'
 import { commonErrorsMessages } from '../../utils/config/constants'
-import { alreadyUsedValidation } from '../../utils/database/alreadyUsedValidation'
+import { alreadyUsedValidation } from '../../utils/validations/alreadyUsedValidation'
 import { sendConfirmEmail } from './__utils__/sendConfirmEmail'
 
 export const errorsMessages = {
@@ -38,12 +39,8 @@ signupRouter.post(
       .custom(async (name: string) => {
         return await alreadyUsedValidation(User, 'name', name)
       }),
-    body('password')
-      .trim()
-      .notEmpty(),
-    query('redirectURI')
-      .optional({ nullable: true })
-      .trim()
+    body('password').trim().notEmpty(),
+    query('redirectURI').optional({ nullable: true }).trim()
   ],
   validateRequest,
   async (req: Request, res: Response) => {
@@ -61,11 +58,12 @@ signupRouter.post(
       password: hashedPassword,
       tempToken
     })
+    await UserSetting.create({ userId: user.id })
     await sendConfirmEmail({
       email,
       tempToken,
       redirectURI,
-      subject: 'SocialProject - Confirm signup',
+      subject: 'Thream - Confirm signup',
       renderOptions: {
         subtitle: 'Please confirm signup',
         buttonText: 'Yes, I signup',

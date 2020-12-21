@@ -12,16 +12,16 @@ import Guild from './Guild'
 @Table
 export default class Invitation extends Model<Invitation> {
   @Column({
-    type: DataType.TEXT,
+    type: DataType.STRING,
     allowNull: false
   })
   value!: string
 
-  // 0 = never expires
   @Column({
     type: DataType.BIGINT,
     allowNull: false
   })
+  /** expiresIn is how long, in milliseconds, until the invitation expires. Note: 0 = never expires */
   expiresIn!: number
 
   @Column({

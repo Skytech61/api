@@ -12,7 +12,7 @@ import {
   guildsIconPath,
   imageFileUploadOptions
 } from '../../utils/config/constants'
-import { alreadyUsedValidation } from '../../utils/database/alreadyUsedValidation'
+import { alreadyUsedValidation } from '../../utils/validations/alreadyUsedValidation'
 import { ForbiddenError } from '../../utils/errors/ForbiddenError'
 import { uploadImage } from '../../utils/uploadImage'
 
@@ -48,14 +48,14 @@ postGuildsRouter.post(
     if (req.user == null) {
       throw new ForbiddenError()
     }
-    const { name, description } = req.body as {
+    const { name, description = '' } = req.body as {
       name: string
       description?: string
     }
     const icon = req.files?.icon
     const user = req.user.current
 
-    const guild = await Guild.create({ name, description: description ?? '' })
+    const guild = await Guild.create({ name, description })
     await Member.create({
       userId: user.id,
       guildId: guild.id,

@@ -1,10 +1,10 @@
-/guilds/{guildId}/channels:
+/guilds/{guildId}/invitations:
   post:
     security:
       - bearerAuth: []
     tags:
-      - 'guilds'
-    summary: 'Create a channel'
+      - 'invitations'
+    summary: 'Create an invitation'
     parameters:
       - name: 'guildId'
         in: 'path'
@@ -15,18 +15,19 @@
           schema:
             type: 'object'
             properties:
-              name:
+              value:
                 type: 'string'
-                minLength: 3
-                maxLength: 30
-              description:
-                type: 'string'
-                maxLength: 160
+                minLength: 1
+                maxLength: 250
+              expiresIn:
+                type: 'integer'
+              isPublic:
+                type: 'boolean'
     responses:
       allOf:
-        - $ref: '#/definitions/BadRequestError'
         - $ref: '#/definitions/UnauthorizedError'
         - $ref: '#/definitions/ForbiddenError'
+        - $ref: '#/definitions/BadRequestError'
         - $ref: '#/definitions/NotFoundError'
         - '201':
             content:
@@ -34,6 +35,6 @@
                 schema:
                   type: 'object'
                   properties:
-                    channel:
+                    invitation:
                       allOf:
-                        - $ref: '#/definitions/Channel'
+                        - $ref: '#/definitions/Invitation'

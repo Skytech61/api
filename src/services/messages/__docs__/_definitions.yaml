@@ -1,20 +1,18 @@
 definitions:
-  Channel:
+  Message:
     type: 'object'
     properties:
       id:
         type: 'integer'
         description: 'Unique id'
-      name:
+      value:
         type: 'string'
       type:
         type: 'string'
-        enum: ['text', 'voice']
-      description:
-        type: 'string'
-      isDefault:
-        type: 'boolean'
-      guildId:
+        enum: ['text', 'file']
+      memberId:
+        type: 'integer'
+      channelId:
         type: 'integer'
       createdAt:
         type: 'string'

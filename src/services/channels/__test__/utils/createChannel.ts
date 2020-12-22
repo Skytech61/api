@@ -2,30 +2,23 @@ import request from 'supertest'
 
 import app from '../../../../app'
 import Channel from '../../../../models/Channel'
-import { createGuild } from '../../../guilds/__test__/utils/createGuild'
+import {
+  createGuild,
+  CreateGuildResult
+} from '../../../guilds/__test__/utils/createGuild'
 
 interface ChannelOptions {
   name: string
   description: string
 }
 
+interface CreateChannelResult extends CreateGuildResult {
+  channels: Channel[]
+}
+
 export const createChannel = async (
   channels: ChannelOptions[]
-): Promise<{
-  user: {
-    id: number
-    accessToken: string
-    type: 'Bearer'
-  }
-  guild: {
-    id?: number
-    name: string
-    description: string
-    icon: string
-    isPublic: boolean
-  }
-  channels: Channel[]
-}> => {
+): Promise<CreateChannelResult> => {
   const result = await createGuild({
     guild: { description: 'description', name: 'guild' },
     user: {
@@ -42,7 +35,6 @@ export const createChannel = async (
       .expect(201)
     channelsResponses.push(response.body.channel)
   }
-
   return {
     ...result,
     channels: channelsResponses
